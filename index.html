@@ -12100,26 +12100,33 @@ const DATA = [
   ];
 
 const app = document.getElementById("app");
+const nav = document.getElementById("nav");
 
 function renderSections(){
+  nav.innerHTML = DATA.map((section, sIndex) => `
+    <a href="#${section.id}">${sIndex + 1}-бөлім</a>
+  `).join("");
+
   app.innerHTML = DATA.map((section, sIndex) => `
-    <section class="section" id="${section.id}">
-      <div class="section-head">
+    <section class="card" id="${section.id}">
+      <div class="head">
         <div class="part">${section.part}</div>
         <h2>${section.title}</h2>
-        <p>${section.desc || ""}</p>
+        <div class="desc">${section.desc || ""}</div>
       </div>
 
-      <div class="summary-box">
-        ${section.summary || ""}
-      </div>
+      ${section.summary ? `
+        <div class="summarybox">
+          ${section.summary}
+        </div>
+      ` : ""}
 
       ${section.keys && section.keys.length ? `
-        <div class="key-box">
+        <div class="keybox">
           <h3>Негізгі тірек ұғымдар</h3>
-          <ul>
-            ${section.keys.map(k => `<li>${k}</li>`).join("")}
-          </ul>
+          <div class="grid">
+            ${section.keys.map(k => `<div class="pill">${k}</div>`).join("")}
+          </div>
         </div>
       ` : ""}
 
@@ -12127,8 +12134,8 @@ function renderSections(){
         ${section.questions.map((q, qIndex) => renderQuestion(q, sIndex, qIndex)).join("")}
       </div>
 
-      <button class="check-btn" onclick="checkSection(${sIndex})">Нәтижені көрсету</button>
-      <div class="result" id="result-${sIndex}"></div>
+      <button class="btn" onclick="checkSection(${sIndex})">Нәтижені көрсету</button>
+      <div class="sectionTotal" id="result-${sIndex}"></div>
     </section>
   `).join("");
 }
@@ -12136,15 +12143,13 @@ function renderSections(){
 function renderQuestion(q, sIndex, qIndex){
   const inputType = q.type === "multi" ? "checkbox" : "radio";
   return `
-    <div class="question-card" id="q-${sIndex}-${qIndex}">
-      <div class="q-top">
-        <span class="q-num">${qIndex + 1}</span>
-        <span class="q-type">${q.type === "multi" ? "Бірнеше жауап" : "Бір жауап"}</span>
-      </div>
-      <p class="q-text">${q.q}</p>
+    <div class="q" id="q-${sIndex}-${qIndex}">
+      <div class="qtag">${q.type === "multi" ? "Бірнеше жауап" : "Бір жауап"}</div>
+      <div class="qtitle">${qIndex + 1}. ${q.q}</div>
+
       <div class="options">
         ${q.options.map((opt, optIndex) => `
-          <label class="option" id="opt-${sIndex}-${qIndex}-${optIndex}">
+          <label class="opt" id="opt-${sIndex}-${qIndex}-${optIndex}">
             <input 
               type="${inputType}" 
               name="q-${sIndex}-${qIndex}" 
@@ -12154,7 +12159,9 @@ function renderQuestion(q, sIndex, qIndex){
           </label>
         `).join("")}
       </div>
-      <div class="explanation" id="exp-${sIndex}-${qIndex}"></div>
+
+      <div class="sourceq">Дереккөз: ${q.source || "И.А. Зимняя. Педагогикалық психология"}</div>
+      <div class="feedback" id="exp-${sIndex}-${qIndex}"></div>
     </div>
   `;
 }
@@ -12186,25 +12193,28 @@ function checkSection(sIndex){
 
     if(isCorrect){
       correctCount++;
-      card.classList.add("answered-correct");
-      card.classList.remove("answered-wrong");
+      explanation.className = "feedback ok";
     } else {
-      card.classList.add("answered-wrong");
-      card.classList.remove("answered-correct");
+      explanation.className = "feedback bad";
     }
 
     explanation.innerHTML = `
-      <div class="exp-title">${isCorrect ? "Дұрыс жауап" : "Түсіндіру"}</div>
-      <p>${q.e}</p>
+      <div class="${isCorrect ? "oktxt" : "badtxt"}">${isCorrect ? "Дұрыс жауап" : "Түсіндіру"}</div>
+      <div class="ex">${q.e}</div>
     `;
   });
 
   const result = document.getElementById(`result-${sIndex}`);
+  result.style.display = "block";
   result.innerHTML = `
-    <strong>Нәтиже:</strong> ${correctCount} / ${section.questions.length}
+    <h3>Нәтиже: ${correctCount} / ${section.questions.length}</h3>
   `;
 
   result.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+function scrollToTop(){
+  window.scrollTo({ top:0, behavior:"smooth" });
 }
 
 function escapeHtml(text){
@@ -12224,20 +12234,5 @@ renderSections();
 
 </body>
 </html>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
